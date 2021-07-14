@@ -1,0 +1,18 @@
+[project]
+name = "phc-notebook-tools"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Anthony Roach", email = "anthony.roach@lifeomic.com"},
+]
+dependencies = []
+requires-python = ">=3.8"
+dynamic = ["classifiers"]
+license = {text = "MIT"}
+
+[project.urls]
+homepage = ""
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"

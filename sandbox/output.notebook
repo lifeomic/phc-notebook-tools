@@ -1,0 +1,135 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "5d57e6c8-3b65-4150-94bd-ffeeba96037f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-07-15T19:04:35.998331Z",
+     "iopub.status.busy": "2021-07-15T19:04:35.993270Z",
+     "iopub.status.idle": "2021-07-15T19:04:36.002941Z",
+     "shell.execute_reply": "2021-07-15T19:04:36.002201Z"
+    },
+    "papermill": {
+     "duration": 0.052787,
+     "end_time": "2021-07-15T19:04:36.003137",
+     "exception": false,
+     "start_time": "2021-07-15T19:04:35.950350",
+     "status": "completed"
+    },
+    "tags": [
+     "parameters"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "a: int = 1 # a variable\n",
+    "b: str = 'foo' # b variable\n",
+    "\n",
+    "# input: str = 'input.txt' # input file\n",
+    "# output: str = 'test.txt' # output file\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "325436f7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-07-15T19:04:36.019022Z",
+     "iopub.status.busy": "2021-07-15T19:04:36.018195Z",
+     "iopub.status.idle": "2021-07-15T19:04:36.020734Z",
+     "shell.execute_reply": "2021-07-15T19:04:36.019944Z"
+    },
+    "papermill": {
+     "duration": 0.012746,
+     "end_time": "2021-07-15T19:04:36.020886",
+     "exception": false,
+     "start_time": "2021-07-15T19:04:36.008140",
+     "status": "completed"
+    },
+    "tags": [
+     "injected-parameters"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "# Parameters\n",
+    "a = 2\n",
+    "b = \"bar\"\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "3b12fe77-e25b-41f8-992d-f6938a456391",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2021-07-15T19:04:36.037229Z",
+     "iopub.status.busy": "2021-07-15T19:04:36.036437Z",
+     "iopub.status.idle": "2021-07-15T19:04:36.039300Z",
+     "shell.execute_reply": "2021-07-15T19:04:36.039786Z"
+    },
+    "papermill": {
+     "duration": 0.013435,
+     "end_time": "2021-07-15T19:04:36.039989",
+     "exception": false,
+     "start_time": "2021-07-15T19:04:36.026554",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2 bar\n"
+     ]
+    }
+   ],
+   "source": [
+    "# with open(output, mode='w') as f:\n",
+    "#    print(a, b, file=f)\n",
+    "print(a,b)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.12"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 1.527988,
+   "end_time": "2021-07-15T19:04:36.357960",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "/var/lib/cwl/stgaddfb12c-d8a0-43bb-87da-5c81ad73491a/test.ipynb",
+   "output_path": "output.notebook",
+   "parameters": {
+    "a": 2,
+    "b": "bar"
+   },
+   "start_time": "2021-07-15T19:04:34.829972",
+   "version": "2.3.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

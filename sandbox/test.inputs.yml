@@ -1,0 +1,7 @@
+notebook:
+  class: File
+  path: test.ipynb
+parameters:
+  class: File
+  path: parameters.yml
+output_name: output.ipynb

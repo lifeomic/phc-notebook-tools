@@ -65,9 +65,10 @@ def create_input_from_param(parameter: Parameter):
 
 @cli.command()
 @click.option('-i', '--image', default='lifeomic_tool/lifeomic/notebook-runner', help='the name of the docker image to use to run the notebook')
+@click.option('-t', '--notebook-tool', help='get the notebook as a tool rather than embedding it in the workflow')
 @click.argument('notebook', required=True)
 @click.argument('workflow_output', required=True, type=click.File('w'))
-def workflow(notebook, workflow_output, image):
+def workflow(notebook, workflow_output, image, notebook_tool):
     """ Convert NOTEBOOK into a workflow writton to WORKFLOW_OUTPUT.
         Use '-' for WORKFLOW_OUTPUT to write the workflow to stdout.
     """
@@ -76,7 +77,7 @@ def workflow(notebook, workflow_output, image):
     with open(notebook) as f:
         notebook_contents = f.read()
 
-    arguments = [os.path.basename(notebook)]
+    arguments = []
     inputs: Mapping[str, Any] = {
         'notebook_out_name': {
             'type': 'string',
@@ -96,10 +97,7 @@ def workflow(notebook, workflow_output, image):
     step_out: List[str] = ['notebook_out']
     step_inputs: Mapping[str, Any] = {
         'notebook_out_name': {
-            'type': 'string',
-            'inputBinding': {
-                'position': 1
-            }
+            'type': 'string'
         }
     }
     step_outputs: Mapping[str, Any] = {
@@ -111,26 +109,29 @@ def workflow(notebook, workflow_output, image):
         }
     }
 
-    num_inputs = 0
+    if not notebook_tool:
+        arguments.append(os.path.basename(notebook))
+    else:
+        inputs['notebook'] = {
+            'type': 'string',
+            'default': notebook_tool
+        }
+        step_in['NOTEBOOK'] = 'notebook'
+        step_inputs['NOTEBOOK'] = {
+            'type': 'string'
+        }
+        arguments.append(f'/tmp/{os.path.basename(notebook)}')
+
+    arguments.append('$(inputs.notebook_out_name)')
+
     for name, parameter in parameters.items():
         if parameter['help'] == INPUT_FILE:
             inputs[name] = create_input_from_param(parameter)
             step_in[name] = name
-            arguments.append({
-                'valueFrom': '-p',
-                'position': num_inputs*3 + 2
-            })
-            arguments.append({
-                'valueFrom': name,
-                'position': num_inputs*3 + 3
-            })
+            arguments.extend(['-p', name, f'$(inputs.{name})'])
             step_inputs[name] = {
-                'type': 'File',
-                'inputBinding': {
-                    'position': num_inputs*3 + 4
-                }
+                'type': 'File'
             }
-            num_inputs += 1
 
         elif parameter['help'] == OUTPUT_FILE:
             outputs[parameter['name']] = {
@@ -149,21 +150,10 @@ def workflow(notebook, workflow_output, image):
         else:
             inputs[name] = create_input_from_param(parameter)
             step_in[name] = name
-            arguments.append({
-                'valueFrom': '-p',
-                'position': num_inputs*3 + 2
-            })
-            arguments.append({
-                'valueFrom': name,
-                'position': num_inputs*3 + 3
-            })
+            arguments.extend(['-p', name, f'$(inputs.{name})'])
             step_inputs[name] = {
                 'type': cwl_type_from_param(parameter),
-                'inputBinding': {
-                    'position': num_inputs*3 + 4
-                }
             }
-            num_inputs += 1
 
     workflow = {
         'cwlVersion': 'v1.0',
@@ -189,16 +179,6 @@ def workflow(notebook, workflow_output, image):
                             'dockerPull': image
                         }
                     },
-                    'requirements': {
-                        'InitialWorkDirRequirement': {
-                            'listing': [
-                                {
-                                    'entryname': os.path.basename(notebook),
-                                    'entry': notebook_contents.replace('$', r'\\$')
-                                }
-                            ]
-                        }
-                    },
                     'arguments': arguments,
                     'inputs': step_inputs,
                     'outputs': step_outputs
@@ -206,5 +186,17 @@ def workflow(notebook, workflow_output, image):
             }
         }
     }
+
+    if not notebook_tool:
+        workflow['steps']['run_notebook']['run']['requirements'] = {
+                'InitialWorkDirRequirement': {
+                'listing': [
+                    {
+                        'entryname': os.path.basename(notebook),
+                        'entry': notebook_contents.replace('$', r'\\$')
+                    }
+                ]
+            }
+        }
 
     workflow_output.write(dump(workflow))

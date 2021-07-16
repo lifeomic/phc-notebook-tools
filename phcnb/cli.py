@@ -4,6 +4,9 @@ import papermill as pm
 from yaml import dump
 import os
 
+IMAGE_NAME = 'notebook-runner'
+INPUT_FILE = 'input file'
+OUTPUT_FILE = 'output file'
 
 class Parameter(TypedDict):
     name: str
@@ -15,16 +18,49 @@ class Parameter(TypedDict):
 def cli():
     pass
 
-def create_input(parameter: Parameter):
-    #TODO: handle inferred types rather than just treating params as a string
+def is_param_a_file(parameter: Parameter):
+    return 'help' in parameter and (parameter['help'] == INPUT_FILE or parameter['help'] == OUTPUT_FILE)
+
+def cwl_type_from_param(parameter: Parameter):
+    if is_param_a_file(parameter):
+        return 'File'
+    elif 'inferred_type_name' not in parameter:
+        return 'string'
+    elif parameter['inferred_type_name'] == 'int':
+        return 'long'
+    elif parameter['inferred_type_name'] == 'float':
+        return 'double'
+    elif parameter['inferred_type_name'] == 'bool':
+        return 'boolean'
+    else:
+        return 'string'
+
+def cwl_default_from_param(parameter: Parameter):
+    if is_param_a_file(parameter):
+        return None
+    elif 'inferred_type_name' not in parameter:
+        return parameter['default'].strip('\'"')
+    elif parameter['inferred_type_name'] == 'int':
+        return int(parameter['default'])
+    elif parameter['inferred_type_name'] == 'float':
+        return float(parameter['default'])
+    elif parameter['inferred_type_name'] == 'bool':
+        return bool(parameter['default'])
+    else:
+        return parameter['default'].strip('\'"')
+
+def create_input_from_param(parameter: Parameter):
     result = {
-        'type': 'File' if parameter['help'] == 'input file' else 'string'
+        'type': cwl_type_from_param(parameter)
     }
+
+    default = cwl_default_from_param(parameter)
+
+    if default is not None:
+        result['default'] =  default
+
     if parameter['help']:
         result['doc'] = parameter['help']
-    if parameter['default']:
-        value = parameter['default'].strip("'")
-        result['default'] = f'"{value}"'
 
     return result
 
@@ -33,12 +69,13 @@ def create_input(parameter: Parameter):
 def workflow(notebook):
     parameters: Mapping[str, Parameter] = pm.inspect_notebook(notebook)
 
-    # TODO: upload notebook to TRS
-    notebook_tool = 'lifeomic_tool/my_notebook'
+    with open(notebook) as f:
+        notebook_contents = f.read()
 
+    arguments = [notebook]
     inputs: Mapping[str, Any] = {
         'notebook_out_name': {
-            'type': 'String',
+            'type': 'string',
             'doc': 'file name for the output notebook',
             'default': 'output.ipynb'
         }
@@ -54,17 +91,10 @@ def workflow(notebook):
     }
     step_out: List[str] = ['notebook_out']
     step_inputs: Mapping[str, Any] = {
-        'NOTEBOOK': {
+        'notebook_out_name': {
             'type': 'string',
-            'default': notebook_tool,
             'inputBinding': {
                 'position': 1
-            }
-        },
-        'notebook_out_name': {
-            'type': 'String',
-            'inputBinding': {
-                'position': 2
             }
         }
     }
@@ -77,37 +107,59 @@ def workflow(notebook):
         }
     }
 
+    num_inputs = 0
     for name, parameter in parameters.items():
-        if parameter['help'] == 'input file':
-            inputs[name] = create_input(parameter)
+        if parameter['help'] == INPUT_FILE:
+            inputs[name] = create_input_from_param(parameter)
             step_in[name] = name
+            arguments.append({
+                'valueFrom': '-p',
+                'position': num_inputs*3 + 2
+            })
+            arguments.append({
+                'valueFrom': name,
+                'position': num_inputs*3 + 3
+            })
             step_inputs[name] = {
                 'type': 'File',
                 'inputBinding': {
-                    'prefix': f'-p {name}',
-                    'position': 3
+                    'position': num_inputs*3 + 4
                 }
             }
+            num_inputs += 1
 
-        elif parameter['help'] == 'output file':
+        elif parameter['help'] == OUTPUT_FILE:
+            outputs[parameter['name']] = {
+                'outputSource': f"run_notebook/{parameter['name']}",
+                'type': 'File'
+            }
             step_outputs[name] = {
                 'type': 'File',
                 'outputBinding': {
-                   'glob': parameter['default']
+                   'glob': parameter['default'].strip('\'"')
                 }
             }
             step_out.append(name)
             pass
+
         else:
-            inputs[name] = create_input(parameter)
+            inputs[name] = create_input_from_param(parameter)
             step_in[name] = name
+            arguments.append({
+                'valueFrom': '-p',
+                'position': num_inputs*3 + 2
+            })
+            arguments.append({
+                'valueFrom': name,
+                'position': num_inputs*3 + 3
+            })
             step_inputs[name] = {
-                'type': 'string',
+                'type': cwl_type_from_param(parameter),
                 'inputBinding': {
-                    'prefix': f'-p {name}',
-                    'position': 3
+                    'position': num_inputs*3 + 4
                 }
             }
+            num_inputs += 1
 
     workflow = {
         'cwlVersion': 'v1.0',
@@ -130,9 +182,20 @@ def workflow(notebook):
                     'class': 'CommandLineTool',
                     'hints': {
                         'DockerRequirement': {
-                            'dockerPull': 'lifeomic_tool/notebook-runner'
+                            'dockerPull': IMAGE_NAME
                         }
                     },
+                    'requirements': {
+                        'InitialWorkDirRequirement': {
+                            'listing': [
+                                {
+                                    'entryname': notebook,
+                                    'entry': notebook_contents.replace('$', r'\$')
+                                }
+                            ]
+                        }
+                    },
+                    'arguments': arguments,
                     'inputs': step_inputs,
                     'outputs': step_outputs
                 }

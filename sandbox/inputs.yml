@@ -1,0 +1,5 @@
+a: 42
+b: 'qux'
+in_file:
+  class: File
+  path: in_file.txt

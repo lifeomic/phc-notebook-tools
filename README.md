@@ -12,6 +12,15 @@ Install [PDM](https://pdm.fming.dev/index.html) and then do
 $ pdm install
 ```
 
-Running: `python phcnb workflow sandbox/test.ipynb`
+## Running
 
-Right now this just prints out the workflow.
+To run the development version from the root
+of the source directory do this:
+
+```
+$ cd sandbox
+$ python ../phcnb workflow test.ipynb > output.cwl
+$ pdm run cwltool --no-read-only --no-match-user output.cwl inputs.yml
+```
+
+The results will be written to `output.ipynb` and `output.txt`.

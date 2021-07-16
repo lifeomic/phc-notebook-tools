@@ -4,7 +4,6 @@ import papermill as pm
 from yaml import dump
 import os
 
-IMAGE_NAME = 'notebook-runner'
 INPUT_FILE = 'input file'
 OUTPUT_FILE = 'output file'
 
@@ -65,8 +64,13 @@ def create_input_from_param(parameter: Parameter):
     return result
 
 @cli.command()
-@click.argument("notebook", required=True)
-def workflow(notebook):
+@click.option('-i', '--image', default='lifeomic_tool/lifeomic/notebook-runner', help='the name of the docker image to use to run the notebook')
+@click.argument('notebook', required=True)
+@click.argument('workflow_output', required=True, type=click.File('w'))
+def workflow(notebook, workflow_output, image):
+    """ Convert NOTEBOOK into a workflow writton to WORKFLOW_OUTPUT.
+        Use '-' for WORKFLOW_OUTPUT to write the workflow to stdout.
+    """
     parameters: Mapping[str, Parameter] = pm.inspect_notebook(notebook)
 
     with open(notebook) as f:
@@ -182,7 +186,7 @@ def workflow(notebook):
                     'class': 'CommandLineTool',
                     'hints': {
                         'DockerRequirement': {
-                            'dockerPull': IMAGE_NAME
+                            'dockerPull': image
                         }
                     },
                     'requirements': {
@@ -203,4 +207,4 @@ def workflow(notebook):
         }
     }
 
-    print(dump(workflow))
+    workflow_output.write(dump(workflow))

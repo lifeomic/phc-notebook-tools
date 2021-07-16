@@ -76,7 +76,7 @@ def workflow(notebook, workflow_output, image):
     with open(notebook) as f:
         notebook_contents = f.read()
 
-    arguments = [notebook]
+    arguments = [os.path.basename(notebook)]
     inputs: Mapping[str, Any] = {
         'notebook_out_name': {
             'type': 'string',
@@ -193,8 +193,8 @@ def workflow(notebook, workflow_output, image):
                         'InitialWorkDirRequirement': {
                             'listing': [
                                 {
-                                    'entryname': notebook,
-                                    'entry': notebook_contents.replace('$', r'\$')
+                                    'entryname': os.path.basename(notebook),
+                                    'entry': notebook_contents.replace('$', r'\\$')
                                 }
                             ]
                         }

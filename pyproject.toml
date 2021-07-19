@@ -1,6 +1,6 @@
 [project]
 name = "phcnb"
-version = "0.1.0"
+version = "0.1.2"
 description = ""
 authors = [
     {name = "Anthony Roach", email = "anthony.roach@lifeomic.com"},
@@ -25,7 +25,7 @@ requires = ["pdm-pep517"]
 build-backend = "pdm.pep517.api"
 
 [project.scripts]
-pdm = "pdm.core:main"
+phcnb = "phcnb.cli:cli"
 
 [tool]
 [tool.pdm]

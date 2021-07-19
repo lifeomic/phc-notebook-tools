@@ -1,18 +1,36 @@
 [project]
-name = "phc-notebook-tools"
+name = "phcnb"
 version = "0.1.0"
 description = ""
 authors = [
     {name = "Anthony Roach", email = "anthony.roach@lifeomic.com"},
 ]
-dependencies = []
+dependencies = [
+    "click~=8.0",
+    "phc~=0.22",
+    "papermill~=2.3",
+    "pyyaml~=5.4",
+]
 requires-python = ">=3.8"
 dynamic = ["classifiers"]
 license = {text = "MIT"}
 
 [project.urls]
-homepage = ""
+homepage = "https://github.com/lifeomic/phc-notebook-tools"
+Repository = "https://github.com/lifeomic/phc-notebook-tools"
 
+[project.optional-dependencies]
 [build-system]
 requires = ["pdm-pep517"]
 build-backend = "pdm.pep517.api"
+
+[project.scripts]
+pdm = "pdm.core:main"
+
+[tool]
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "twine~=3.4",
+    "cwltool~=3.1",
+]

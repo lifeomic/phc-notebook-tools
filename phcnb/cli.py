@@ -69,7 +69,7 @@ def create_input_from_param(parameter: Parameter):
 @click.argument('notebook', required=True)
 @click.argument('workflow_output', required=True, type=click.File('w'))
 def workflow(notebook, workflow_output, image, notebook_tool):
-    """ Convert LIFEOMIC_NOTEBOOK into a workflow written to WORKFLOW_OUTPUT.
+    """ Convert NOTEBOOK into a workflow written to WORKFLOW_OUTPUT.
         Use '-' for WORKFLOW_OUTPUT to write the workflow to stdout.
     """
     parameters: Mapping[str, Parameter] = pm.inspect_notebook(notebook)

@@ -69,7 +69,7 @@ def create_input_from_param(parameter: Parameter):
 @click.argument('notebook', required=True)
 @click.argument('workflow_output', required=True, type=click.File('w'))
 def workflow(notebook, workflow_output, image, notebook_tool):
-    """ Convert NOTEBOOK into a workflow writton to WORKFLOW_OUTPUT.
+    """ Convert NOTEBOOK into a workflow written to WORKFLOW_OUTPUT.
         Use '-' for WORKFLOW_OUTPUT to write the workflow to stdout.
     """
     parameters: Mapping[str, Parameter] = pm.inspect_notebook(notebook)
@@ -116,8 +116,8 @@ def workflow(notebook, workflow_output, image, notebook_tool):
             'type': 'string',
             'default': notebook_tool
         }
-        step_in['NOTEBOOK'] = 'notebook'
-        step_inputs['NOTEBOOK'] = {
+        step_in['LIFEOMIC_NOTEBOOK'] = 'notebook'
+        step_inputs['LIFEOMIC_NOTEBOOK'] = {
             'type': 'string'
         }
         arguments.append(f'/tmp/{os.path.basename(notebook)}')
